@@ -1,0 +1,65 @@
+version: '3'
+services:
+  ldap:
+    image: ldap
+    container_name: ldap
+    build:
+      context: ldap
+    ports:
+      - '389:389'
+    environment:
+      LDAP_DOMAIN: "example.org"
+      LDAP_ADMIN_PASSWORD: "password"
+    networks:
+      - my_network
+  idp:
+    image: idp 
+    container_name: idp
+    build:
+      context: idp
+    ports:
+      - 443:443
+    networks:
+      my_network:
+        aliases:
+          - idp.example.org
+    volumes:
+      - shared_volume:/opt/shibboleth-idp/logs
+  sp:
+    image: sp
+    container_name: sp
+    build:
+      context: sp
+    ports:
+      - 10443:10443
+    networks:
+      - my_network
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    networks:
+      - my_network
+  loki:
+    container_name: loki
+    image: grafana/loki
+    networks:
+      - my_network
+  promtail:
+    image: grafana/promtail
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - my_network
+    volumes:
+      - shared_volume:/opt/shibboleth-idp/logs
+      - ./promtail/config.yml:/etc/promtail/config.yml
+    container_name: promtail
+    ports:
+      - 9080:9080
+    restart: always
+networks:
+  my_network:
+    driver: bridge
+volumes:
+  shared_volume:

@@ -1,27 +1,15 @@
 server:
-  # 9080 ポートで HTTP でリッスンする
-  # ブラウザで開くとログのディスカバリの状態が見れます
   http_listen_port: 9080
-
-  # grpc のリッスンポート、0 ならランダムに決定される・・・これなにに使っている の？
   grpc_listen_port: 0
 
-
 clients:
-  # Loki の URL を指定
   - url: http://loki:3100/loki/api/v1/push
 
-# ログのディスカバリの設定
 scrape_configs:
-
-  # Apache のアクセスログを収集
   - job_name: access_log
     static_configs:
       - targets:
-          # targets は localhost または自ホスト名のどちらかを指定する必要がある
-          # とドキュメントに書いてた気がするけど何でも通る？ というかこれ指定で きる意味あるの？
           - localhost
         labels:
-          # __path__ ラベルでファイル名を指定する、ワイルドカードも指定可能
           __path__: /opt/shibboleth-idp/logs/idp-process.log
 
